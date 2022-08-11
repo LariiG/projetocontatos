@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UsuarioService } from 'src/app/services/usuario.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-login',
@@ -8,7 +10,10 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class LoginComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    private usuarioService: UsuarioService,
+    private spinnerService: NgxSpinnerService
+  ) { }
 
   ngOnInit(): void {
   }
@@ -20,14 +25,27 @@ formLogin = new FormGroup({
   //campo 'senha'
   senha: new FormControl('', [Validators.required])
   });
+
   //função para acessar e exibir os erros de validação do formulário
   get form(): any {
   return this.formLogin.controls;
   }
+
   //função para capturar o SUBMIT do formulário
   onSubmit(): void {
-  //exibindo os valores dos campos do formulário no console
-  console.log(this.formLogin.value);
-  }
-  
+
+  this.spinnerService.show();
+
+  this.usuarioService.postLogin(this.formLogin.value)
+  .subscribe({
+    next: (auth) => {
+      console.log(auth);
+      this.spinnerService.hide();
+    },
+    error: (e) => {
+      console.log(e.error);
+      this.spinnerService.hide();
+    }
+  })
+}
 }
